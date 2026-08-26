@@ -42,8 +42,7 @@ export default defineContentScript({
     }
 
     function decoratePackageNames() {
-      console.log('Decorating package names...');
-      const links = document.querySelectorAll<HTMLAnchorElement>('a[href^="/package/"]');
+      const links = document.querySelectorAll<HTMLAnchorElement>('section a[href^="/package/"]');
 
       const seen = new Set<string>();
 
