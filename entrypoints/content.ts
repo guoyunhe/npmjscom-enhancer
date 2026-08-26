@@ -1,5 +1,5 @@
 export default defineContentScript({
-  matches: ['*://www.npmjs.com/search*'],
+  matches: ['*://www.npmjs.com/*'],
   async main() {
     const cache = new Map<string, { types: boolean; dtTypes: boolean; esm: boolean }>();
 
@@ -42,6 +42,7 @@ export default defineContentScript({
     }
 
     function decoratePackageNames() {
+      console.log('Decorating package names...');
       const links = document.querySelectorAll<HTMLAnchorElement>('a[href^="/package/"]');
 
       const seen = new Set<string>();
