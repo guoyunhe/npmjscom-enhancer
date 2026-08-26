@@ -17,12 +17,28 @@ export default defineBackground(() => {
             dtTypes = dtRes.ok;
           }
 
+          // Check ESM: type=module, module field, or exports.*.import
+          let esm = data.type === 'module' || !!data.module;
+          if (!esm && data.exports) {
+            const checkExports = (obj: unknown): boolean => {
+              if (!obj || typeof obj !== 'object') return false;
+              for (const [key, val] of Object.entries(obj)) {
+                if (key === 'import') return true;
+                if (val && typeof val === 'object') {
+                  if (checkExports(val)) return true;
+                }
+              }
+              return false;
+            };
+            esm = checkExports(data.exports);
+          }
+
           sendResponse({
             ok: true,
             data: {
               types,
               dtTypes,
-              esm: !!(data.type === 'module' || data.exports),
+              esm,
             },
           });
         })
