@@ -48,6 +48,24 @@ export default defineContentScript({
       }
     }
 
+    function createSocketBadge(name: string) {
+      const a = document.createElement('a');
+      a.href = `https://socket.dev/npm/package/${name}`;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.marginLeft = '4px';
+      const img = document.createElement('img');
+      img.src = `https://badge.socket.dev/npm/package/${name}`;
+      img.alt = 'Socket Security';
+      img.loading = 'lazy';
+      Object.assign(img.style, {
+        height: '18px',
+        verticalAlign: 'middle',
+      });
+      a.appendChild(img);
+      return a;
+    }
+
     function createBadge(label: string, bg: string, outline = false) {
       const span = document.createElement('span');
       Object.assign(span.style, {
@@ -70,8 +88,8 @@ export default defineContentScript({
     function isOutdated(section: HTMLElement): boolean {
       const text = section.textContent || '';
       const match = text.match(/(\d+)\s+years?\s+ago/);
-      if (!match) return false;
-      return parseInt(match[1], 10) > 3;
+      if (!match || !match[1]) return false;
+      return parseInt(match[1], 10) >= 3;
     }
 
     function markOutdated(section: HTMLElement) {
@@ -109,20 +127,29 @@ export default defineContentScript({
 
         Promise.all([getPackageInfo(name), getBundlephobiaInfo(name)]).then(
           ([{ types, dtTypes, esm }, { gzip }]) => {
+            let ref: Element = link;
             // TS/DT badge
             if (types) {
-              link.after(createBadge('TS', '#3178c6'));
+              ref = createBadge('TS', '#3178c6');
+              link.after(ref);
             } else if (dtTypes) {
-              link.after(createBadge('DT', '#3178c6', true));
+              ref = createBadge('DT', '#3178c6', true);
+              link.after(ref);
             }
             // ESM badge
             if (esm) {
-              link.after(createBadge('ESM', '#4caf50'));
+              const badge = createBadge('ESM', '#4caf50');
+              ref.after(badge);
+              ref = badge;
             }
             // Bundlephobia badge
             if (gzip > 0) {
-              link.after(createBadge(formatSize(gzip), '#e65100'));
+              const badge = createBadge(formatSize(gzip), '#e65100');
+              ref.after(badge);
+              ref = badge;
             }
+            // Socket Security badge
+            ref.after(createSocketBadge(name));
           },
         );
       }
@@ -135,7 +162,7 @@ export default defineContentScript({
       header.dataset.npmjsEnhancerDetail = '1';
 
       const pathMatch = location.pathname.match(/^\/package\/(.+)$/);
-      if (!pathMatch) return;
+      if (!pathMatch || !pathMatch[1]) return;
 
       const name = pathMatch[1];
 
@@ -150,6 +177,10 @@ export default defineContentScript({
           badge.style.marginLeft = '8px';
           header.appendChild(badge);
         }
+        const socketBadge = createSocketBadge(name);
+        socketBadge.style.height = '22px';
+        socketBadge.style.marginLeft = '8px';
+        header.appendChild(socketBadge);
       });
     }
 
