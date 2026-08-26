@@ -1,7 +1,14 @@
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} kB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default defineContentScript({
   matches: ['*://www.npmjs.com/*'],
   async main() {
     const cache = new Map<string, { types: boolean; dtTypes: boolean; esm: boolean }>();
+    const bpCache = new Map<string, { size: number; gzip: number }>();
 
     async function getPackageInfo(name: string) {
       if (cache.has(name)) return cache.get(name)!;
@@ -18,6 +25,25 @@ export default defineContentScript({
       } catch {
         const info = { types: false, dtTypes: false, esm: false };
         cache.set(name, info);
+        return info;
+      }
+    }
+
+    async function getBundlephobiaInfo(name: string) {
+      if (bpCache.has(name)) return bpCache.get(name)!;
+      try {
+        const res = await browser.runtime.sendMessage({
+          type: 'FETCH_BUNDLEPHOBIA_INFO',
+          name,
+        });
+        if (res.ok) {
+          bpCache.set(name, res.data);
+          return res.data as { size: number; gzip: number };
+        }
+        throw new Error(res.error);
+      } catch {
+        const info = { size: 0, gzip: 0 };
+        bpCache.set(name, info);
         return info;
       }
     }
@@ -67,15 +93,45 @@ export default defineContentScript({
             link.after(createBadge('ESM', '#4caf50'));
           }
         });
+
+        getBundlephobiaInfo(name).then(({ gzip }) => {
+          if (gzip > 0) {
+            link.after(createBadge(formatSize(gzip), '#e65100'));
+          }
+        });
       }
+    }
+
+    function decoratePackageDetail() {
+      // Match the package detail page header
+      const header = document.querySelector('h1');
+      if (!header || header.dataset.npmjsEnhancerDetail) return;
+      header.dataset.npmjsEnhancerDetail = '1';
+
+      const pathMatch = location.pathname.match(/^\/package\/(.+)$/);
+      if (!pathMatch) return;
+
+      const name = pathMatch[1];
+
+      getBundlephobiaInfo(name).then(({ gzip }) => {
+        if (gzip > 0) {
+          const badge = createBadge(formatSize(gzip), '#e65100');
+          badge.style.fontSize = '14px';
+          badge.style.padding = '3px 6px';
+          badge.style.marginLeft = '8px';
+          header.appendChild(badge);
+        }
+      });
     }
 
     // Initial scan
     decoratePackageNames();
+    decoratePackageDetail();
 
     // Observe DOM changes for dynamic loading
     const observer = new MutationObserver(() => {
       decoratePackageNames();
+      decoratePackageDetail();
     });
 
     observer.observe(document.body, {
