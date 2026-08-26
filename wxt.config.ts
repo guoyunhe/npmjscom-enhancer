@@ -7,6 +7,15 @@ export default defineConfig({
     description: '__MSG_extensionDescription__',
     default_locale: 'en',
     host_permissions: ['https://registry.npmjs.org/*'],
+    browser_specific_settings: {
+      gecko: {
+        id: 'npmjscom-enhancer@guoyunhe.me',
+        strict_min_version: '115.0',
+        data_collection_permissions: {
+          required: ['none'],
+        },
+      },
+    },
   },
   modules: ['@wxt-dev/module-react'],
   webExt: {
