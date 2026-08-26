@@ -168,15 +168,31 @@ export default defineContentScript({
       // Skip @types/* packages
       if (name.startsWith('@types/')) return;
 
-      const bpBadge = createBundlephobiaBadge(name);
-      bpBadge.querySelector('img')!.style.height = '22px';
-      bpBadge.style.marginLeft = '8px';
-      header.appendChild(bpBadge);
+      getPackageInfo(name).then(({ types, dtTypes, esm }) => {
+        // Types badge
+        const typesBadge = createTypesBadge(types, dtTypes);
+        typesBadge.style.height = '22px';
+        typesBadge.style.marginLeft = '8px';
+        header.appendChild(typesBadge);
 
-      const socketBadge = createSocketBadge(name);
-      socketBadge.querySelector('img')!.style.height = '22px';
-      socketBadge.style.marginLeft = '8px';
-      header.appendChild(socketBadge);
+        // ESM badge
+        const esmBadge = createEsmBadge(esm);
+        esmBadge.style.height = '22px';
+        esmBadge.style.marginLeft = '8px';
+        header.appendChild(esmBadge);
+
+        // Bundlephobia badge
+        const bpBadge = createBundlephobiaBadge(name);
+        bpBadge.querySelector('img')!.style.height = '22px';
+        bpBadge.style.marginLeft = '8px';
+        header.appendChild(bpBadge);
+
+        // Socket Security badge
+        const socketBadge = createSocketBadge(name);
+        socketBadge.querySelector('img')!.style.height = '22px';
+        socketBadge.style.marginLeft = '8px';
+        header.appendChild(socketBadge);
+      });
     }
 
     // Initial scan
