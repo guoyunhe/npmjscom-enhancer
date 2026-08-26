@@ -79,6 +79,9 @@ export default defineContentScript({
 
         const name = link.getAttribute('href')!.replace('/package/', '');
 
+        // Skip @types/* packages
+        if (name.startsWith('@types/')) continue;
+
         // Deduplicate: only process each package name once per scan
         if (seen.has(name)) continue;
         seen.add(name);
@@ -112,6 +115,9 @@ export default defineContentScript({
       if (!pathMatch) return;
 
       const name = pathMatch[1];
+
+      // Skip @types/* packages
+      if (name.startsWith('@types/')) return;
 
       getBundlephobiaInfo(name).then(({ gzip }) => {
         if (gzip > 0) {
