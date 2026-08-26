@@ -27,14 +27,18 @@ export default defineContentScript({
       a.href = `https://bundlephobia.com/package/${name}`;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.style.marginLeft = '4px';
+      Object.assign(a.style, {
+        display: 'inline-block',
+        marginLeft: '4px',
+        verticalAlign: 'middle',
+      });
       const img = document.createElement('img');
       img.src = `https://badgen.net/bundlephobia/minzip/${name}`;
       img.alt = 'Bundlephobia';
       img.loading = 'lazy';
       Object.assign(img.style, {
+        display: 'block',
         height: '18px',
-        verticalAlign: 'middle',
       });
       a.appendChild(img);
       return a;
@@ -45,14 +49,18 @@ export default defineContentScript({
       a.href = `https://socket.dev/npm/package/${name}`;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.style.marginLeft = '4px';
+      Object.assign(a.style, {
+        display: 'inline-block',
+        marginLeft: '4px',
+        verticalAlign: 'middle',
+      });
       const img = document.createElement('img');
       img.src = `https://badge.socket.dev/npm/package/${name}`;
       img.alt = 'Socket Security';
       img.loading = 'lazy';
       Object.assign(img.style, {
+        display: 'block',
         height: '18px',
-        verticalAlign: 'middle',
       });
       a.appendChild(img);
       return a;
@@ -72,6 +80,7 @@ export default defineContentScript({
       }
       img.loading = 'lazy';
       Object.assign(img.style, {
+        display: 'block',
         height: '18px',
         marginLeft: '4px',
         verticalAlign: 'middle',
@@ -87,6 +96,7 @@ export default defineContentScript({
       img.alt = esm ? 'ESM: yes' : 'ESM: no';
       img.loading = 'lazy';
       Object.assign(img.style, {
+        display: 'block',
         height: '18px',
         marginLeft: '4px',
         verticalAlign: 'middle',
