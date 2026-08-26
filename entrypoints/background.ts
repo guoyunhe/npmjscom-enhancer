@@ -61,27 +61,5 @@ export default defineBackground(() => {
         });
       return true;
     }
-
-    if (message.type === 'FETCH_BUNDLEPHOBIA_INFO') {
-      const { name } = message;
-      fetch(`https://bundlephobia.com/api/size?package=${encodeURIComponent(name)}`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.json();
-        })
-        .then((data) => {
-          sendResponse({
-            ok: true,
-            data: {
-              size: data.size as number,
-              gzip: data.gzip as number,
-            },
-          });
-        })
-        .catch((err) => {
-          sendResponse({ ok: false, error: String(err) });
-        });
-      return true;
-    }
   });
 });

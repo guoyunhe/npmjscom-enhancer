@@ -1,14 +1,7 @@
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} kB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 export default defineContentScript({
   matches: ['*://www.npmjs.com/*'],
   async main() {
     const cache = new Map<string, { types: boolean; dtTypes: boolean; esm: boolean }>();
-    const bpCache = new Map<string, { size: number; gzip: number }>();
 
     async function getPackageInfo(name: string) {
       if (cache.has(name)) return cache.get(name)!;
@@ -29,23 +22,22 @@ export default defineContentScript({
       }
     }
 
-    async function getBundlephobiaInfo(name: string) {
-      if (bpCache.has(name)) return bpCache.get(name)!;
-      try {
-        const res = await browser.runtime.sendMessage({
-          type: 'FETCH_BUNDLEPHOBIA_INFO',
-          name,
-        });
-        if (res.ok) {
-          bpCache.set(name, res.data);
-          return res.data as { size: number; gzip: number };
-        }
-        throw new Error(res.error);
-      } catch {
-        const info = { size: 0, gzip: 0 };
-        bpCache.set(name, info);
-        return info;
-      }
+    function createBundlephobiaBadge(name: string) {
+      const a = document.createElement('a');
+      a.href = `https://bundlephobia.com/package/${name}`;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.marginLeft = '4px';
+      const img = document.createElement('img');
+      img.src = `https://badgen.net/bundlephobia/minzip/${name}`;
+      img.alt = 'Bundlephobia';
+      img.loading = 'lazy';
+      Object.assign(img.style, {
+        height: '18px',
+        verticalAlign: 'middle',
+      });
+      a.appendChild(img);
+      return a;
     }
 
     function createSocketBadge(name: string) {
@@ -64,6 +56,21 @@ export default defineContentScript({
       });
       a.appendChild(img);
       return a;
+    }
+
+    function createEsmBadge(esm: boolean) {
+      const img = document.createElement('img');
+      img.src = esm
+        ? 'https://img.shields.io/badge/ESM-yes-green'
+        : 'https://img.shields.io/badge/ESM-no-red';
+      img.alt = esm ? 'ESM: yes' : 'ESM: no';
+      img.loading = 'lazy';
+      Object.assign(img.style, {
+        height: '18px',
+        marginLeft: '4px',
+        verticalAlign: 'middle',
+      });
+      return img;
     }
 
     function createBadge(label: string, bg: string, outline = false) {
@@ -125,33 +132,27 @@ export default defineContentScript({
           markOutdated(section);
         }
 
-        Promise.all([getPackageInfo(name), getBundlephobiaInfo(name)]).then(
-          ([{ types, dtTypes, esm }, { gzip }]) => {
-            let ref: Element = link;
-            // TS/DT badge
-            if (types) {
-              ref = createBadge('TS', '#3178c6');
-              link.after(ref);
-            } else if (dtTypes) {
-              ref = createBadge('DT', '#3178c6', true);
-              link.after(ref);
-            }
-            // ESM badge
-            if (esm) {
-              const badge = createBadge('ESM', '#4caf50');
-              ref.after(badge);
-              ref = badge;
-            }
-            // Bundlephobia badge
-            if (gzip > 0) {
-              const badge = createBadge(formatSize(gzip), '#e65100');
-              ref.after(badge);
-              ref = badge;
-            }
-            // Socket Security badge
-            ref.after(createSocketBadge(name));
-          },
-        );
+        getPackageInfo(name).then(({ types, dtTypes, esm }) => {
+          let ref: Element = link;
+          // TS/DT badge
+          if (types) {
+            ref = createBadge('TS', '#3178c6');
+            link.after(ref);
+          } else if (dtTypes) {
+            ref = createBadge('DT', '#3178c6', true);
+            link.after(ref);
+          }
+          // ESM badge
+          const esmBadge = createEsmBadge(esm);
+          ref.after(esmBadge);
+          ref = esmBadge;
+          // Bundlephobia badge
+          const bpBadge = createBundlephobiaBadge(name);
+          ref.after(bpBadge);
+          ref = bpBadge;
+          // Socket Security badge
+          ref.after(createSocketBadge(name));
+        });
       }
     }
 
@@ -169,19 +170,15 @@ export default defineContentScript({
       // Skip @types/* packages
       if (name.startsWith('@types/')) return;
 
-      getBundlephobiaInfo(name).then(({ gzip }) => {
-        if (gzip > 0) {
-          const badge = createBadge(formatSize(gzip), '#e65100');
-          badge.style.fontSize = '14px';
-          badge.style.padding = '3px 6px';
-          badge.style.marginLeft = '8px';
-          header.appendChild(badge);
-        }
-        const socketBadge = createSocketBadge(name);
-        socketBadge.style.height = '22px';
-        socketBadge.style.marginLeft = '8px';
-        header.appendChild(socketBadge);
-      });
+      const bpBadge = createBundlephobiaBadge(name);
+      bpBadge.querySelector('img')!.style.height = '22px';
+      bpBadge.style.marginLeft = '8px';
+      header.appendChild(bpBadge);
+
+      const socketBadge = createSocketBadge(name);
+      socketBadge.querySelector('img')!.style.height = '22px';
+      socketBadge.style.marginLeft = '8px';
+      header.appendChild(socketBadge);
     }
 
     // Initial scan
