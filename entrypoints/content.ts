@@ -58,12 +58,18 @@ export default defineContentScript({
       return a;
     }
 
-    function createEsmBadge(esm: boolean) {
+    function createTypesBadge(types: boolean, dtTypes: boolean) {
       const img = document.createElement('img');
-      img.src = esm
-        ? 'https://img.shields.io/badge/ESM-yes-green'
-        : 'https://img.shields.io/badge/ESM-no-red';
-      img.alt = esm ? 'ESM: yes' : 'ESM: no';
+      if (types) {
+        img.src = 'https://badgen.net/badge/Types/yes/green';
+        img.alt = 'TypeScript: built-in';
+      } else if (dtTypes) {
+        img.src = 'https://badgen.net/badge/Types/dt/yellow';
+        img.alt = 'TypeScript: @types';
+      } else {
+        img.src = 'https://badgen.net/badge/Types/no/red';
+        img.alt = 'TypeScript: no';
+      }
       img.loading = 'lazy';
       Object.assign(img.style, {
         height: '18px',
@@ -73,23 +79,19 @@ export default defineContentScript({
       return img;
     }
 
-    function createBadge(label: string, bg: string, outline = false) {
-      const span = document.createElement('span');
-      Object.assign(span.style, {
-        display: 'inline-block',
-        fontSize: '12px',
-        fontWeight: '400',
-        lineHeight: '1',
-        padding: outline ? '1px 4px' : '2px 5px',
-        borderRadius: '3px',
-        color: outline ? bg : '#fff',
-        backgroundColor: outline ? 'transparent' : bg,
-        border: outline ? `1.5px solid ${bg}` : 'none',
+    function createEsmBadge(esm: boolean) {
+      const img = document.createElement('img');
+      img.src = esm
+        ? 'https://badgen.net/badge/ESM/yes/green'
+        : 'https://badgen.net/badge/ESM/no/red';
+      img.alt = esm ? 'ESM: yes' : 'ESM: no';
+      img.loading = 'lazy';
+      Object.assign(img.style, {
+        height: '18px',
         marginLeft: '4px',
         verticalAlign: 'middle',
       });
-      span.textContent = label;
-      return span;
+      return img;
     }
 
     function isOutdated(section: HTMLElement): boolean {
@@ -134,14 +136,10 @@ export default defineContentScript({
 
         getPackageInfo(name).then(({ types, dtTypes, esm }) => {
           let ref: Element = link;
-          // TS/DT badge
-          if (types) {
-            ref = createBadge('TS', '#3178c6');
-            link.after(ref);
-          } else if (dtTypes) {
-            ref = createBadge('DT', '#3178c6', true);
-            link.after(ref);
-          }
+          // Types badge
+          const typesBadge = createTypesBadge(types, dtTypes);
+          ref.after(typesBadge);
+          ref = typesBadge;
           // ESM badge
           const esmBadge = createEsmBadge(esm);
           ref.after(esmBadge);
