@@ -1,8 +1,8 @@
 {
-  "name": "wxt-react-starter",
-  "version": "0.0.0",
+  "name": "npmjscom-enhancer",
+  "version": "0.1.0",
   "private": true,
-  "description": "manifest.json description",
+  "description": "enhance the experience of npmjs.com",
   "type": "module",
   "scripts": {
     "build": "wxt build",
