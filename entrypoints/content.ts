@@ -67,6 +67,21 @@ export default defineContentScript({
       return span;
     }
 
+    function isOutdated(section: HTMLElement): boolean {
+      const text = section.textContent || '';
+      const match = text.match(/(\d+)\s+years?\s+ago/);
+      if (!match) return false;
+      return parseInt(match[1], 10) > 3;
+    }
+
+    function markOutdated(section: HTMLElement) {
+      if (section.dataset.npmjsOutdated) return;
+      section.dataset.npmjsOutdated = '1';
+      section.style.opacity = '0.5';
+      section.style.filter = 'grayscale(0.6)';
+      section.title = 'This package has not been updated for over 3 years';
+    }
+
     function decoratePackageNames() {
       const links = document.querySelectorAll<HTMLAnchorElement>('section a[href^="/package/"]');
 
@@ -86,22 +101,30 @@ export default defineContentScript({
         if (seen.has(name)) continue;
         seen.add(name);
 
-        getPackageInfo(name).then(({ types, dtTypes, esm }) => {
-          if (types) {
-            link.after(createBadge('TS', '#3178c6'));
-          } else if (dtTypes) {
-            link.after(createBadge('DT', '#3178c6', true));
-          }
-          if (esm) {
-            link.after(createBadge('ESM', '#4caf50'));
-          }
-        });
+        // Check if the package is outdated (>3 years since last publish)
+        const section = link.closest('section');
+        if (section && isOutdated(section)) {
+          markOutdated(section);
+        }
 
-        getBundlephobiaInfo(name).then(({ gzip }) => {
-          if (gzip > 0) {
-            link.after(createBadge(formatSize(gzip), '#e65100'));
-          }
-        });
+        Promise.all([getPackageInfo(name), getBundlephobiaInfo(name)]).then(
+          ([{ types, dtTypes, esm }, { gzip }]) => {
+            // TS/DT badge
+            if (types) {
+              link.after(createBadge('TS', '#3178c6'));
+            } else if (dtTypes) {
+              link.after(createBadge('DT', '#3178c6', true));
+            }
+            // ESM badge
+            if (esm) {
+              link.after(createBadge('ESM', '#4caf50'));
+            }
+            // Bundlephobia badge
+            if (gzip > 0) {
+              link.after(createBadge(formatSize(gzip), '#e65100'));
+            }
+          },
+        );
       }
     }
 
