@@ -8,9 +8,23 @@ export default defineBackground(() => {
           return res.json();
         })
         .then(async (data) => {
-          const types = !!(data.types || data.typings);
-          let dtTypes = false;
+          // Check types: types/typings field, or exports.*.types
+          let types = !!(data.types || data.typings);
+          if (!types && data.exports) {
+            const checkExportsTypes = (obj: unknown): boolean => {
+              if (!obj || typeof obj !== 'object') return false;
+              for (const [key, val] of Object.entries(obj)) {
+                if (key === 'types') return true;
+                if (val && typeof val === 'object') {
+                  if (checkExportsTypes(val)) return true;
+                }
+              }
+              return false;
+            };
+            types = checkExportsTypes(data.exports);
+          }
 
+          let dtTypes = false;
           if (!types) {
             // Check if @types/<name> exists
             const dtRes = await fetch(`https://registry.npmjs.org/@types/${name}`);
