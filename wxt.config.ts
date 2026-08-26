@@ -9,4 +9,11 @@ export default defineConfig({
     host_permissions: ['https://registry.npmjs.org/*', 'https://bundlephobia.com/*'],
   },
   modules: ['@wxt-dev/module-react'],
+  webExt: {
+    startUrls: [
+      'https://www.npmjs.com',
+      'https://www.npmjs.com/search?q=lodash',
+      'https://www.npmjs.com/package/lodash',
+    ],
+  },
 });
