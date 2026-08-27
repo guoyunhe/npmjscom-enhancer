@@ -95,6 +95,10 @@ export default defineContentScript({
       return createBadgeImg(`https://badgen.net/bundlephobia/tree-shaking/${name}`, 'Tree shaking');
     }
 
+    function createInstallSizeBadge(name: string) {
+      return createBadgeImg(`https://badgen.net/packagephobia/install/${name}`, 'Install size');
+    }
+
     function createStarsBadge(githubRepo: string) {
       if (!githubRepo) return null;
       return createBadgeImg(`https://badgen.net/github/stars/${githubRepo}`, 'GitHub stars');
@@ -154,6 +158,7 @@ export default defineContentScript({
               createEsmBadge(esm),
               createDepCountBadge(name),
               createTreeShakingBadge(name),
+              createInstallSizeBadge(name),
               createBundlephobiaBadge(name),
               createSocketBadge(name),
               createNodeBadge(name),
@@ -195,6 +200,7 @@ export default defineContentScript({
             createEsmBadge(esm),
             createDepCountBadge(name),
             createTreeShakingBadge(name),
+            createInstallSizeBadge(name),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),

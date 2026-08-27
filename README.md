@@ -13,6 +13,7 @@ A browser extension that enriches the [npmjs.com](https://www.npmjs.com) browsin
 - **ESM badge** — Native ESM support via `type: "module"` or `exports.*.import`
 - **Dependency count badge** — Total dependency count via `badgen.net/bundlephobia/dependency-count/`
 - **Tree shaking badge** — Tree-shaking support via `badgen.net/bundlephobia/tree-shaking/`
+- **Install size badge** — Package install size via `badgen.net/packagephobia/install/`
 - **Bundle size badge** — Minified + gzipped size, clickable link to [Bundlephobia](https://bundlephobia.com)
 - **GitHub stars badge** — Star count from the package's GitHub repository
 - **GitHub forks badge** — Fork count from the package's GitHub repository
