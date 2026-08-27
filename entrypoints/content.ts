@@ -44,7 +44,8 @@ export default defineContentScript({
     function wrapBadges(badges: HTMLElement[], gap = '4px') {
       const wrapper = document.createElement('span');
       Object.assign(wrapper.style, {
-        display: 'inline-flex',
+        display: 'flex',
+        flexWrap: 'wrap',
         alignItems: 'center',
         gap,
         verticalAlign: 'middle',
@@ -209,7 +210,7 @@ export default defineContentScript({
           ].filter(Boolean) as HTMLElement[],
           '8px',
         );
-        header.appendChild(wrapper);
+        header.after(wrapper);
       });
     }
 
