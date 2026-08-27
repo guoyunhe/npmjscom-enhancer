@@ -1,10 +1,7 @@
 export default defineContentScript({
   matches: ['*://www.npmjs.com/*'],
   async main() {
-    const cache = new Map<
-      string,
-      { types: boolean; dtTypes: boolean; esm: boolean; depCount: number }
-    >();
+    const cache = new Map<string, { esm: boolean; depCount: number }>();
 
     async function getPackageInfo(name: string) {
       if (cache.has(name)) return cache.get(name)!;
@@ -15,11 +12,11 @@ export default defineContentScript({
         });
         if (res.ok) {
           cache.set(name, res.data);
-          return res.data as { types: boolean; dtTypes: boolean; esm: boolean; depCount: number };
+          return res.data as { esm: boolean; depCount: number };
         }
         throw new Error(res.error);
       } catch {
-        const info = { types: false, dtTypes: false, esm: false, depCount: 0 };
+        const info = { esm: false, depCount: 0 };
         cache.set(name, info);
         return info;
       }
@@ -75,14 +72,8 @@ export default defineContentScript({
       return createBadgeImg(`https://badgen.net/npm/node/${name}`, 'Node.js version');
     }
 
-    function createTypesBadge(types: boolean, dtTypes: boolean) {
-      if (types) {
-        return createBadgeImg('https://badgen.net/badge/types/yes/green', 'TypeScript: built-in');
-      }
-      if (dtTypes) {
-        return createBadgeImg('https://badgen.net/badge/types/dt/yellow', 'TypeScript: @types');
-      }
-      return createBadgeImg('https://badgen.net/badge/types/no/red', 'TypeScript: no');
+    function createTypesBadge(name: string) {
+      return createBadgeImg(`https://badgen.net/npm/types/${name}`, 'TypeScript types');
     }
 
     function createEsmBadge(esm: boolean) {
@@ -142,9 +133,9 @@ export default defineContentScript({
           continue;
         }
 
-        getPackageInfo(name).then(({ types, dtTypes, esm, depCount }) => {
+        getPackageInfo(name).then(({ esm, depCount }) => {
           const wrapper = wrapBadges([
-            createTypesBadge(types, dtTypes),
+            createTypesBadge(name),
             createEsmBadge(esm),
             createDepCountBadge(depCount),
             createBundlephobiaBadge(name),
@@ -178,10 +169,10 @@ export default defineContentScript({
         return;
       }
 
-      getPackageInfo(name).then(({ types, dtTypes, esm, depCount }) => {
+      getPackageInfo(name).then(({ esm, depCount }) => {
         const wrapper = wrapBadges(
           [
-            createTypesBadge(types, dtTypes),
+            createTypesBadge(name),
             createEsmBadge(esm),
             createDepCountBadge(depCount),
             createBundlephobiaBadge(name),

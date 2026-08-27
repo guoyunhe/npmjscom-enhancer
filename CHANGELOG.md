@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2026-08-27
+
+### Changed
+
+- **TypeScript badge**: Use `badgen.net/npm/types/` endpoint to auto-detect type status, replacing manual `types`/`dtTypes` detection.
+
 ## [0.2.0] - 2026-08-27
 
 ### Added
