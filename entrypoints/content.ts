@@ -30,8 +30,6 @@ export default defineContentScript({
       Object.assign(img.style, {
         display: 'block',
         height,
-        marginLeft: '4px',
-        verticalAlign: 'middle',
       });
       return img;
     }
@@ -41,13 +39,20 @@ export default defineContentScript({
       a.href = href;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      Object.assign(a.style, {
-        display: 'inline-block',
-        marginLeft: '4px',
-        verticalAlign: 'middle',
-      });
       a.appendChild(createBadgeImg(imgSrc, alt, height));
       return a;
+    }
+
+    function wrapBadges(badges: HTMLElement[], gap = '4px') {
+      const wrapper = document.createElement('span');
+      Object.assign(wrapper.style, {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap,
+        verticalAlign: 'middle',
+      });
+      for (const badge of badges) wrapper.appendChild(badge);
+      return wrapper;
     }
 
     function createBundlephobiaBadge(name: string, height?: string) {
@@ -141,18 +146,14 @@ export default defineContentScript({
         }
 
         getPackageInfo(name).then(({ types, dtTypes, esm }) => {
-          const badges = [
+          const wrapper = wrapBadges([
             createTypesBadge(types, dtTypes),
             createEsmBadge(esm),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),
-          ];
-          let ref: Element = link;
-          for (const badge of badges) {
-            ref.after(badge);
-            ref = badge;
-          }
+          ]);
+          link.parentElement!.after(wrapper);
         });
       }
     }
@@ -179,18 +180,18 @@ export default defineContentScript({
       }
 
       getPackageInfo(name).then(({ types, dtTypes, esm }) => {
-        const DETAIL = { height: '22px', margin: '8px' };
-        const badges = [
-          createTypesBadge(types, dtTypes, DETAIL.height),
-          createEsmBadge(esm, DETAIL.height),
-          createBundlephobiaBadge(name, DETAIL.height),
-          createSocketBadge(name, DETAIL.height),
-          createNodeBadge(name, DETAIL.height),
-        ];
-        for (const badge of badges) {
-          badge.style.marginLeft = DETAIL.margin;
-          header.appendChild(badge);
-        }
+        const DETAIL_HEIGHT = '22px';
+        const wrapper = wrapBadges(
+          [
+            createTypesBadge(types, dtTypes, DETAIL_HEIGHT),
+            createEsmBadge(esm, DETAIL_HEIGHT),
+            createBundlephobiaBadge(name, DETAIL_HEIGHT),
+            createSocketBadge(name, DETAIL_HEIGHT),
+            createNodeBadge(name, DETAIL_HEIGHT),
+          ],
+          '8px',
+        );
+        header.appendChild(wrapper);
       });
     }
 
