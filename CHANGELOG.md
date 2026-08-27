@@ -2,9 +2,14 @@
 
 ## [0.3.0] - 2026-08-27
 
+### Added
+
+- **Tree shaking badge**: Display tree-shaking support badge via `badgen.net/bundlephobia/tree-shaking/`.
+
 ### Changed
 
 - **TypeScript badge**: Use `badgen.net/npm/types/` endpoint to auto-detect type status, replacing manual `types`/`dtTypes` detection.
+- **Dependency count badge**: Use `badgen.net/bundlephobia/dependency-count/` endpoint, removing manual dependency counting logic.
 
 ## [0.2.0] - 2026-08-27
 

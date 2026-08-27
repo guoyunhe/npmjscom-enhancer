@@ -90,6 +90,10 @@ export default defineContentScript({
       );
     }
 
+    function createTreeShakingBadge(name: string) {
+      return createBadgeImg(`https://badgen.net/bundlephobia/tree-shaking/${name}`, 'Tree shaking');
+    }
+
     function isOutdated(section: HTMLElement): boolean {
       const text = section.textContent || '';
       const match = text.match(/(\d+)\s+years?\s+ago/);
@@ -137,6 +141,7 @@ export default defineContentScript({
             createTypesBadge(name),
             createEsmBadge(esm),
             createDepCountBadge(name),
+            createTreeShakingBadge(name),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),
@@ -174,6 +179,7 @@ export default defineContentScript({
             createTypesBadge(name),
             createEsmBadge(esm),
             createDepCountBadge(name),
+            createTreeShakingBadge(name),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),
