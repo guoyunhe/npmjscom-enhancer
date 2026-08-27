@@ -22,24 +22,21 @@ export default defineContentScript({
       }
     }
 
-    function createBadgeImg(src: string, alt: string, height = '18px') {
+    function createBadgeImg(src: string, alt: string) {
       const img = document.createElement('img');
       img.src = src;
       img.alt = alt;
       img.loading = 'lazy';
-      Object.assign(img.style, {
-        display: 'block',
-        height,
-      });
+      img.style.display = 'block';
       return img;
     }
 
-    function createLinkBadge(href: string, imgSrc: string, alt: string, height = '18px') {
+    function createLinkBadge(href: string, imgSrc: string, alt: string) {
       const a = document.createElement('a');
       a.href = href;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.appendChild(createBadgeImg(imgSrc, alt, height));
+      a.appendChild(createBadgeImg(imgSrc, alt));
       return a;
     }
 
@@ -55,51 +52,40 @@ export default defineContentScript({
       return wrapper;
     }
 
-    function createBundlephobiaBadge(name: string, height?: string) {
+    function createBundlephobiaBadge(name: string) {
       return createLinkBadge(
         `https://bundlephobia.com/package/${name}`,
         `https://badgen.net/bundlephobia/minzip/${name}`,
         'Bundlephobia',
-        height,
       );
     }
 
-    function createSocketBadge(name: string, height?: string) {
+    function createSocketBadge(name: string) {
       return createLinkBadge(
         `https://socket.dev/npm/package/${name}`,
         `https://badge.socket.dev/npm/package/${name}`,
         'Socket Security',
-        height,
       );
     }
 
-    function createNodeBadge(name: string, height?: string) {
-      return createBadgeImg(`https://badgen.net/npm/node/${name}`, 'Node.js version', height);
+    function createNodeBadge(name: string) {
+      return createBadgeImg(`https://badgen.net/npm/node/${name}`, 'Node.js version');
     }
 
-    function createTypesBadge(types: boolean, dtTypes: boolean, height?: string) {
+    function createTypesBadge(types: boolean, dtTypes: boolean) {
       if (types) {
-        return createBadgeImg(
-          'https://badgen.net/badge/Types/yes/green',
-          'TypeScript: built-in',
-          height,
-        );
+        return createBadgeImg('https://badgen.net/badge/types/yes/green', 'TypeScript: built-in');
       }
       if (dtTypes) {
-        return createBadgeImg(
-          'https://badgen.net/badge/Types/dt/yellow',
-          'TypeScript: @types',
-          height,
-        );
+        return createBadgeImg('https://badgen.net/badge/types/dt/yellow', 'TypeScript: @types');
       }
-      return createBadgeImg('https://badgen.net/badge/Types/no/red', 'TypeScript: no', height);
+      return createBadgeImg('https://badgen.net/badge/types/no/red', 'TypeScript: no');
     }
 
-    function createEsmBadge(esm: boolean, height?: string) {
+    function createEsmBadge(esm: boolean) {
       return createBadgeImg(
-        esm ? 'https://badgen.net/badge/ESM/yes/green' : 'https://badgen.net/badge/ESM/no/red',
+        esm ? 'https://badgen.net/badge/esm/yes/green' : 'https://badgen.net/badge/esm/no/red',
         esm ? 'ESM: yes' : 'ESM: no',
-        height,
       );
     }
 
@@ -153,6 +139,7 @@ export default defineContentScript({
             createSocketBadge(name),
             createNodeBadge(name),
           ]);
+          wrapper.style.marginTop = '8px';
           link.parentElement!.after(wrapper);
         });
       }
@@ -180,14 +167,13 @@ export default defineContentScript({
       }
 
       getPackageInfo(name).then(({ types, dtTypes, esm }) => {
-        const DETAIL_HEIGHT = '22px';
         const wrapper = wrapBadges(
           [
-            createTypesBadge(types, dtTypes, DETAIL_HEIGHT),
-            createEsmBadge(esm, DETAIL_HEIGHT),
-            createBundlephobiaBadge(name, DETAIL_HEIGHT),
-            createSocketBadge(name, DETAIL_HEIGHT),
-            createNodeBadge(name, DETAIL_HEIGHT),
+            createTypesBadge(types, dtTypes),
+            createEsmBadge(esm),
+            createBundlephobiaBadge(name),
+            createSocketBadge(name),
+            createNodeBadge(name),
           ],
           '8px',
         );
