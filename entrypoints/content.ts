@@ -1,7 +1,7 @@
 export default defineContentScript({
   matches: ['*://www.npmjs.com/*'],
   async main() {
-    const cache = new Map<string, { esm: boolean; depCount: number }>();
+    const cache = new Map<string, { esm: boolean }>();
 
     async function getPackageInfo(name: string) {
       if (cache.has(name)) return cache.get(name)!;
@@ -12,11 +12,11 @@ export default defineContentScript({
         });
         if (res.ok) {
           cache.set(name, res.data);
-          return res.data as { esm: boolean; depCount: number };
+          return res.data as { esm: boolean };
         }
         throw new Error(res.error);
       } catch {
-        const info = { esm: false, depCount: 0 };
+        const info = { esm: false };
         cache.set(name, info);
         return info;
       }
@@ -83,11 +83,10 @@ export default defineContentScript({
       );
     }
 
-    function createDepCountBadge(depCount: number) {
-      const color = depCount === 0 ? 'green' : depCount < 10 ? 'yellow' : 'orange';
+    function createDepCountBadge(name: string) {
       return createBadgeImg(
-        `https://badgen.net/badge/deps/${depCount}/${color}`,
-        `Dependencies: ${depCount}`,
+        `https://badgen.net/bundlephobia/dependency-count/${name}`,
+        'Dependency count',
       );
     }
 
@@ -133,11 +132,11 @@ export default defineContentScript({
           continue;
         }
 
-        getPackageInfo(name).then(({ esm, depCount }) => {
+        getPackageInfo(name).then(({ esm }) => {
           const wrapper = wrapBadges([
             createTypesBadge(name),
             createEsmBadge(esm),
-            createDepCountBadge(depCount),
+            createDepCountBadge(name),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),
@@ -169,12 +168,12 @@ export default defineContentScript({
         return;
       }
 
-      getPackageInfo(name).then(({ esm, depCount }) => {
+      getPackageInfo(name).then(({ esm }) => {
         const wrapper = wrapBadges(
           [
             createTypesBadge(name),
             createEsmBadge(esm),
-            createDepCountBadge(depCount),
+            createDepCountBadge(name),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),

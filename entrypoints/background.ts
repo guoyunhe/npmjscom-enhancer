@@ -24,16 +24,10 @@ export default defineBackground(() => {
             esm = checkExports(data.exports);
           }
 
-          // Count dependencies (dependencies + peerDependencies)
-          const depCount =
-            Object.keys(data.dependencies || {}).length +
-            Object.keys(data.peerDependencies || {}).length;
-
           sendResponse({
             ok: true,
             data: {
               esm,
-              depCount,
             },
           });
         })
