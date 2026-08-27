@@ -9,27 +9,14 @@ A browser extension that enriches the [npmjs.com](https://www.npmjs.com) browsin
 
 ## Features
 
-### Badges
-
-Every package listing and detail page gets a set of informative badges:
-
-| Badge               | Description                                                                    | Source                                       |
-| ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------- |
-| **TypeScript**      | Built-in types (green), `@types/*` available (yellow), or none (red)           | npm registry                                 |
-| **ESM**             | Native ESM support via `type: "module"` or `exports.*.import`                  | npm registry                                 |
-| **Dependencies**    | Total dependency count (dependencies + peerDependencies), color-coded by count | npm registry                                 |
-| **Bundle Size**     | Minified + gzipped bundle size, clickable link to Bundlephobia                 | [bundlephobia.com](https://bundlephobia.com) |
-| **Socket Security** | Package quality & security score, clickable link to Socket                     | [socket.dev](https://socket.dev)             |
-| **Node.js**         | Minimum required Node.js version                                               | [badgen.net](https://badgen.net)             |
-
-### Visual Cues
-
-- **Outdated package dimming** — Packages with no updates for 3+ years are visually dimmed (reduced opacity + grayscale) in search results and excluded from badge display.
-
-### Smart Filtering
-
-- `@types/*` packages are automatically skipped from all badge processing.
-- Duplicate package names in search results are handled correctly.
+- **TypeScript badge** — Built-in types (green), `@types/*` available (yellow), or none (red)
+- **ESM badge** — Native ESM support via `type: "module"` or `exports.*.import`
+- **Dependency count badge** — Total deps (dependencies + peerDependencies), color-coded
+- **Bundle size badge** — Minified + gzipped size, clickable link to [Bundlephobia](https://bundlephobia.com)
+- **Socket Security badge** — Package quality & security score, clickable link to [Socket](https://socket.dev)
+- **Node.js version badge** — Minimum required Node.js version
+- **Outdated package dimming** — Packages with no updates for 3+ years are dimmed and excluded from badges
+- **Smart filtering** — `@types/*` packages are skipped; duplicate search results are handled correctly
 
 ---
 

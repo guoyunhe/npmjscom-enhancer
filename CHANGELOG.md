@@ -1,11 +1,18 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.0] - 2026-08-27
 
 ### Added
 
 - **Node.js version badge**: Display minimum Node.js version requirement badge via `badgen.net/npm/node/`.
-- **Dependency count badge**: Show number of dependencies (dependencies + peerDependencies) with color-coded badge (green/yellow/orange).
+- **Dependency count badge**: Show total dependency count (dependencies + peerDependencies) with color-coded badge (green/yellow/orange).
+
+### Changed
+
+- **Refactored badge rendering**: Extracted shared `createBadgeImg` and `createLinkBadge` helpers to eliminate duplication.
+- **Flex layout**: Badges are now wrapped in an `inline-flex` container with `gap` for spacing, replacing individual `marginLeft`.
+- **Outdated packages**: Packages not updated for 3+ years no longer display badges — only the dimming effect is applied.
+- **Removed custom height**: Badges use default 20px height from badgen.net for a cleaner look.
 
 ## [0.1.0] - 2026-08-27
 
