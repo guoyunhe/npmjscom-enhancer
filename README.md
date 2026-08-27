@@ -9,10 +9,13 @@ A browser extension that enriches the [npmjs.com](https://www.npmjs.com) browsin
 
 ## Features
 
-- **TypeScript badge** — Built-in types (green), `@types/*` available (yellow), or none (red)
+- **TypeScript badge** — Auto-detected type status (built-in, `@types/*`, or none) via `badgen.net/npm/types/`
 - **ESM badge** — Native ESM support via `type: "module"` or `exports.*.import`
-- **Dependency count badge** — Total deps (dependencies + peerDependencies), color-coded
+- **Dependency count badge** — Total dependency count via `badgen.net/bundlephobia/dependency-count/`
+- **Tree shaking badge** — Tree-shaking support via `badgen.net/bundlephobia/tree-shaking/`
 - **Bundle size badge** — Minified + gzipped size, clickable link to [Bundlephobia](https://bundlephobia.com)
+- **GitHub stars badge** — Star count from the package's GitHub repository
+- **GitHub forks badge** — Fork count from the package's GitHub repository
 - **Socket Security badge** — Package quality & security score, clickable link to [Socket](https://socket.dev)
 - **Node.js version badge** — Minimum required Node.js version
 - **Outdated package dimming** — Packages with no updates for 3+ years are dimmed and excluded from badges
@@ -43,8 +46,8 @@ Install from your browser's extension store:
 
 ## How It Works
 
-1. **Detection** — The extension queries the npm registry (`registry.npmjs.org/<name>/latest`) to detect TypeScript support, ESM compatibility, and dependency count.
-2. **Rendering** — Badge images are served via [badgen.net](https://badgen.net) for consistent styling and lazy-loaded for performance.
+1. **Detection** — The extension queries the npm registry (`registry.npmjs.org/<name>/latest`) to detect ESM compatibility and parse the GitHub repository URL.
+2. **Rendering** — Badge images are served via [badgen.net](https://badgen.net) and [badge.socket.dev](https://socket.dev) for consistent styling and lazy-loaded for performance.
 3. **DOM Observation** — A `MutationObserver` watches for dynamic content changes, ensuring badges appear on SPA navigation and infinite scroll.
 
 ---

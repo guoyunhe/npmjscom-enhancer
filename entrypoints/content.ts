@@ -1,7 +1,7 @@
 export default defineContentScript({
   matches: ['*://www.npmjs.com/*'],
   async main() {
-    const cache = new Map<string, { esm: boolean }>();
+    const cache = new Map<string, { esm: boolean; githubRepo: string }>();
 
     async function getPackageInfo(name: string) {
       if (cache.has(name)) return cache.get(name)!;
@@ -12,11 +12,11 @@ export default defineContentScript({
         });
         if (res.ok) {
           cache.set(name, res.data);
-          return res.data as { esm: boolean };
+          return res.data as { esm: boolean; githubRepo: string };
         }
         throw new Error(res.error);
       } catch {
-        const info = { esm: false };
+        const info = { esm: false, githubRepo: '' };
         cache.set(name, info);
         return info;
       }
@@ -36,6 +36,7 @@ export default defineContentScript({
       a.href = href;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
+      a.style.flexShrink = '0';
       a.appendChild(createBadgeImg(imgSrc, alt));
       return a;
     }
@@ -94,6 +95,16 @@ export default defineContentScript({
       return createBadgeImg(`https://badgen.net/bundlephobia/tree-shaking/${name}`, 'Tree shaking');
     }
 
+    function createStarsBadge(githubRepo: string) {
+      if (!githubRepo) return null;
+      return createBadgeImg(`https://badgen.net/github/stars/${githubRepo}`, 'GitHub stars');
+    }
+
+    function createForksBadge(githubRepo: string) {
+      if (!githubRepo) return null;
+      return createBadgeImg(`https://badgen.net/github/forks/${githubRepo}`, 'GitHub forks');
+    }
+
     function isOutdated(section: HTMLElement): boolean {
       const text = section.textContent || '';
       const match = text.match(/(\d+)\s+years?\s+ago/);
@@ -136,16 +147,20 @@ export default defineContentScript({
           continue;
         }
 
-        getPackageInfo(name).then(({ esm }) => {
-          const wrapper = wrapBadges([
-            createTypesBadge(name),
-            createEsmBadge(esm),
-            createDepCountBadge(name),
-            createTreeShakingBadge(name),
-            createBundlephobiaBadge(name),
-            createSocketBadge(name),
-            createNodeBadge(name),
-          ]);
+        getPackageInfo(name).then(({ esm, githubRepo }) => {
+          const wrapper = wrapBadges(
+            [
+              createTypesBadge(name),
+              createEsmBadge(esm),
+              createDepCountBadge(name),
+              createTreeShakingBadge(name),
+              createBundlephobiaBadge(name),
+              createSocketBadge(name),
+              createNodeBadge(name),
+              createStarsBadge(githubRepo),
+              createForksBadge(githubRepo),
+            ].filter(Boolean) as HTMLElement[],
+          );
           wrapper.style.marginTop = '8px';
           link.parentElement!.after(wrapper);
         });
@@ -173,7 +188,7 @@ export default defineContentScript({
         return;
       }
 
-      getPackageInfo(name).then(({ esm }) => {
+      getPackageInfo(name).then(({ esm, githubRepo }) => {
         const wrapper = wrapBadges(
           [
             createTypesBadge(name),
@@ -183,7 +198,9 @@ export default defineContentScript({
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),
-          ],
+            createStarsBadge(githubRepo),
+            createForksBadge(githubRepo),
+          ].filter(Boolean) as HTMLElement[],
           '8px',
         );
         header.appendChild(wrapper);

@@ -8,6 +8,15 @@ export default defineBackground(() => {
           return res.json();
         })
         .then(async (data) => {
+          // Parse GitHub repo from repository field
+          let githubRepo = '';
+          const repo = data.repository;
+          if (repo) {
+            const url = typeof repo === 'string' ? repo : repo.url || '';
+            const match = url.match(/github\.com[/:]([^/]+\/[^/.]+?)(?:\.git)?$/);
+            if (match) githubRepo = match[1];
+          }
+
           // Check ESM: type=module, module field, or exports.*.import
           let esm = data.type === 'module' || !!data.module;
           if (!esm && data.exports) {
@@ -28,6 +37,7 @@ export default defineBackground(() => {
             ok: true,
             data: {
               esm,
+              githubRepo,
             },
           });
         })

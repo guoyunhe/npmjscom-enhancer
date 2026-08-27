@@ -5,6 +5,8 @@
 ### Added
 
 - **Tree shaking badge**: Display tree-shaking support badge via `badgen.net/bundlephobia/tree-shaking/`.
+- **GitHub stars badge**: Display star count badge via `badgen.net/github/stars/`, parsed from `package.json` repository field.
+- **GitHub forks badge**: Display fork count badge via `badgen.net/github/forks/`.
 
 ### Changed
 
