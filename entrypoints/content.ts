@@ -1,7 +1,10 @@
 export default defineContentScript({
   matches: ['*://www.npmjs.com/*'],
   async main() {
-    const cache = new Map<string, { types: boolean; dtTypes: boolean; esm: boolean }>();
+    const cache = new Map<
+      string,
+      { types: boolean; dtTypes: boolean; esm: boolean; depCount: number }
+    >();
 
     async function getPackageInfo(name: string) {
       if (cache.has(name)) return cache.get(name)!;
@@ -12,11 +15,11 @@ export default defineContentScript({
         });
         if (res.ok) {
           cache.set(name, res.data);
-          return res.data as { types: boolean; dtTypes: boolean; esm: boolean };
+          return res.data as { types: boolean; dtTypes: boolean; esm: boolean; depCount: number };
         }
         throw new Error(res.error);
       } catch {
-        const info = { types: false, dtTypes: false, esm: false };
+        const info = { types: false, dtTypes: false, esm: false, depCount: 0 };
         cache.set(name, info);
         return info;
       }
@@ -89,6 +92,14 @@ export default defineContentScript({
       );
     }
 
+    function createDepCountBadge(depCount: number) {
+      const color = depCount === 0 ? 'green' : depCount < 10 ? 'yellow' : 'orange';
+      return createBadgeImg(
+        `https://badgen.net/badge/deps/${depCount}/${color}`,
+        `Dependencies: ${depCount}`,
+      );
+    }
+
     function isOutdated(section: HTMLElement): boolean {
       const text = section.textContent || '';
       const match = text.match(/(\d+)\s+years?\s+ago/);
@@ -131,10 +142,11 @@ export default defineContentScript({
           continue;
         }
 
-        getPackageInfo(name).then(({ types, dtTypes, esm }) => {
+        getPackageInfo(name).then(({ types, dtTypes, esm, depCount }) => {
           const wrapper = wrapBadges([
             createTypesBadge(types, dtTypes),
             createEsmBadge(esm),
+            createDepCountBadge(depCount),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),
@@ -166,11 +178,12 @@ export default defineContentScript({
         return;
       }
 
-      getPackageInfo(name).then(({ types, dtTypes, esm }) => {
+      getPackageInfo(name).then(({ types, dtTypes, esm, depCount }) => {
         const wrapper = wrapBadges(
           [
             createTypesBadge(types, dtTypes),
             createEsmBadge(esm),
+            createDepCountBadge(depCount),
             createBundlephobiaBadge(name),
             createSocketBadge(name),
             createNodeBadge(name),

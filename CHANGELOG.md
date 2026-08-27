@@ -5,6 +5,7 @@
 ### Added
 
 - **Node.js version badge**: Display minimum Node.js version requirement badge via `badgen.net/npm/node/`.
+- **Dependency count badge**: Show number of dependencies (dependencies + peerDependencies) with color-coded badge (green/yellow/orange).
 
 ## [0.1.0] - 2026-08-27
 
