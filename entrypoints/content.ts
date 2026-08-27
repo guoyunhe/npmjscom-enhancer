@@ -134,8 +134,10 @@ export default defineContentScript({
 
         // Check if the package is outdated (>3 years since last publish)
         const section = link.closest('section');
-        if (section && isOutdated(section)) {
+        const outdated = section && isOutdated(section);
+        if (outdated) {
           markOutdated(section);
+          continue;
         }
 
         getPackageInfo(name).then(({ types, dtTypes, esm }) => {
@@ -168,6 +170,13 @@ export default defineContentScript({
 
       // Skip @types/* packages
       if (name.startsWith('@types/')) return;
+
+      // Check if the package is outdated (>3 years since last publish)
+      const section = header.closest('section');
+      if (section && isOutdated(section)) {
+        markOutdated(section);
+        return;
+      }
 
       getPackageInfo(name).then(({ types, dtTypes, esm }) => {
         const DETAIL = { height: '22px', margin: '8px' };
