@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.1.0] - 2026-08-26
+## [Unreleased]
+
+### Added
+
+- **Node.js version badge**: Display minimum Node.js version requirement badge via `badgen.net/npm/node/`.
+
+## [0.1.0] - 2026-08-27
 
 ### Added
 

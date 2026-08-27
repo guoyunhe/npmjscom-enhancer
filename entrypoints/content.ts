@@ -66,6 +66,20 @@ export default defineContentScript({
       return a;
     }
 
+    function createNodeBadge(name: string) {
+      const img = document.createElement('img');
+      img.src = `https://badgen.net/npm/node/${name}`;
+      img.alt = 'Node.js version';
+      img.loading = 'lazy';
+      Object.assign(img.style, {
+        display: 'block',
+        height: '18px',
+        marginLeft: '4px',
+        verticalAlign: 'middle',
+      });
+      return img;
+    }
+
     function createTypesBadge(types: boolean, dtTypes: boolean) {
       const img = document.createElement('img');
       if (types) {
@@ -159,7 +173,11 @@ export default defineContentScript({
           ref.after(bpBadge);
           ref = bpBadge;
           // Socket Security badge
-          ref.after(createSocketBadge(name));
+          const socketBadge = createSocketBadge(name);
+          ref.after(socketBadge);
+          ref = socketBadge;
+          // Node.js version badge
+          ref.after(createNodeBadge(name));
         });
       }
     }
@@ -202,6 +220,12 @@ export default defineContentScript({
         socketBadge.querySelector('img')!.style.height = '22px';
         socketBadge.style.marginLeft = '8px';
         header.appendChild(socketBadge);
+
+        // Node.js version badge
+        const nodeBadge = createNodeBadge(name);
+        nodeBadge.style.height = '22px';
+        nodeBadge.style.marginLeft = '8px';
+        header.appendChild(nodeBadge);
       });
     }
 
