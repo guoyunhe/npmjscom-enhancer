@@ -22,100 +22,80 @@ export default defineContentScript({
       }
     }
 
-    function createBundlephobiaBadge(name: string) {
-      const a = document.createElement('a');
-      a.href = `https://bundlephobia.com/package/${name}`;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      Object.assign(a.style, {
-        display: 'inline-block',
-        marginLeft: '4px',
-        verticalAlign: 'middle',
-      });
+    function createBadgeImg(src: string, alt: string, height = '18px') {
       const img = document.createElement('img');
-      img.src = `https://badgen.net/bundlephobia/minzip/${name}`;
-      img.alt = 'Bundlephobia';
+      img.src = src;
+      img.alt = alt;
       img.loading = 'lazy';
       Object.assign(img.style, {
         display: 'block',
-        height: '18px',
-      });
-      a.appendChild(img);
-      return a;
-    }
-
-    function createSocketBadge(name: string) {
-      const a = document.createElement('a');
-      a.href = `https://socket.dev/npm/package/${name}`;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      Object.assign(a.style, {
-        display: 'inline-block',
-        marginLeft: '4px',
-        verticalAlign: 'middle',
-      });
-      const img = document.createElement('img');
-      img.src = `https://badge.socket.dev/npm/package/${name}`;
-      img.alt = 'Socket Security';
-      img.loading = 'lazy';
-      Object.assign(img.style, {
-        display: 'block',
-        height: '18px',
-      });
-      a.appendChild(img);
-      return a;
-    }
-
-    function createNodeBadge(name: string) {
-      const img = document.createElement('img');
-      img.src = `https://badgen.net/npm/node/${name}`;
-      img.alt = 'Node.js version';
-      img.loading = 'lazy';
-      Object.assign(img.style, {
-        display: 'block',
-        height: '18px',
+        height,
         marginLeft: '4px',
         verticalAlign: 'middle',
       });
       return img;
     }
 
-    function createTypesBadge(types: boolean, dtTypes: boolean) {
-      const img = document.createElement('img');
+    function createLinkBadge(href: string, imgSrc: string, alt: string, height = '18px') {
+      const a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      Object.assign(a.style, {
+        display: 'inline-block',
+        marginLeft: '4px',
+        verticalAlign: 'middle',
+      });
+      a.appendChild(createBadgeImg(imgSrc, alt, height));
+      return a;
+    }
+
+    function createBundlephobiaBadge(name: string, height?: string) {
+      return createLinkBadge(
+        `https://bundlephobia.com/package/${name}`,
+        `https://badgen.net/bundlephobia/minzip/${name}`,
+        'Bundlephobia',
+        height,
+      );
+    }
+
+    function createSocketBadge(name: string, height?: string) {
+      return createLinkBadge(
+        `https://socket.dev/npm/package/${name}`,
+        `https://badge.socket.dev/npm/package/${name}`,
+        'Socket Security',
+        height,
+      );
+    }
+
+    function createNodeBadge(name: string, height?: string) {
+      return createBadgeImg(`https://badgen.net/npm/node/${name}`, 'Node.js version', height);
+    }
+
+    function createTypesBadge(types: boolean, dtTypes: boolean, height?: string) {
       if (types) {
-        img.src = 'https://badgen.net/badge/Types/yes/green';
-        img.alt = 'TypeScript: built-in';
-      } else if (dtTypes) {
-        img.src = 'https://badgen.net/badge/Types/dt/yellow';
-        img.alt = 'TypeScript: @types';
-      } else {
-        img.src = 'https://badgen.net/badge/Types/no/red';
-        img.alt = 'TypeScript: no';
+        return createBadgeImg(
+          'https://badgen.net/badge/Types/yes/green',
+          'TypeScript: built-in',
+          height,
+        );
       }
-      img.loading = 'lazy';
-      Object.assign(img.style, {
-        display: 'block',
-        height: '18px',
-        marginLeft: '4px',
-        verticalAlign: 'middle',
-      });
-      return img;
+      if (dtTypes) {
+        return createBadgeImg(
+          'https://badgen.net/badge/Types/dt/yellow',
+          'TypeScript: @types',
+          height,
+        );
+      }
+      return createBadgeImg('https://badgen.net/badge/Types/no/red', 'TypeScript: no', height);
     }
 
-    function createEsmBadge(esm: boolean) {
-      const img = document.createElement('img');
-      img.src = esm
-        ? 'https://badgen.net/badge/ESM/yes/green'
-        : 'https://badgen.net/badge/ESM/no/red';
-      img.alt = esm ? 'ESM: yes' : 'ESM: no';
-      img.loading = 'lazy';
-      Object.assign(img.style, {
-        display: 'block',
-        height: '18px',
-        marginLeft: '4px',
-        verticalAlign: 'middle',
-      });
-      return img;
+    function createEsmBadge(esm: boolean, height?: string) {
+      return createBadgeImg(
+        esm ? 'https://badgen.net/badge/ESM/yes/green' : 'https://badgen.net/badge/ESM/no/red',
+        esm ? 'ESM: yes' : 'ESM: no',
+        height,
+      );
     }
 
     function isOutdated(section: HTMLElement): boolean {
@@ -159,25 +139,18 @@ export default defineContentScript({
         }
 
         getPackageInfo(name).then(({ types, dtTypes, esm }) => {
+          const badges = [
+            createTypesBadge(types, dtTypes),
+            createEsmBadge(esm),
+            createBundlephobiaBadge(name),
+            createSocketBadge(name),
+            createNodeBadge(name),
+          ];
           let ref: Element = link;
-          // Types badge
-          const typesBadge = createTypesBadge(types, dtTypes);
-          ref.after(typesBadge);
-          ref = typesBadge;
-          // ESM badge
-          const esmBadge = createEsmBadge(esm);
-          ref.after(esmBadge);
-          ref = esmBadge;
-          // Bundlephobia badge
-          const bpBadge = createBundlephobiaBadge(name);
-          ref.after(bpBadge);
-          ref = bpBadge;
-          // Socket Security badge
-          const socketBadge = createSocketBadge(name);
-          ref.after(socketBadge);
-          ref = socketBadge;
-          // Node.js version badge
-          ref.after(createNodeBadge(name));
+          for (const badge of badges) {
+            ref.after(badge);
+            ref = badge;
+          }
         });
       }
     }
@@ -197,35 +170,18 @@ export default defineContentScript({
       if (name.startsWith('@types/')) return;
 
       getPackageInfo(name).then(({ types, dtTypes, esm }) => {
-        // Types badge
-        const typesBadge = createTypesBadge(types, dtTypes);
-        typesBadge.style.height = '22px';
-        typesBadge.style.marginLeft = '8px';
-        header.appendChild(typesBadge);
-
-        // ESM badge
-        const esmBadge = createEsmBadge(esm);
-        esmBadge.style.height = '22px';
-        esmBadge.style.marginLeft = '8px';
-        header.appendChild(esmBadge);
-
-        // Bundlephobia badge
-        const bpBadge = createBundlephobiaBadge(name);
-        bpBadge.querySelector('img')!.style.height = '22px';
-        bpBadge.style.marginLeft = '8px';
-        header.appendChild(bpBadge);
-
-        // Socket Security badge
-        const socketBadge = createSocketBadge(name);
-        socketBadge.querySelector('img')!.style.height = '22px';
-        socketBadge.style.marginLeft = '8px';
-        header.appendChild(socketBadge);
-
-        // Node.js version badge
-        const nodeBadge = createNodeBadge(name);
-        nodeBadge.style.height = '22px';
-        nodeBadge.style.marginLeft = '8px';
-        header.appendChild(nodeBadge);
+        const DETAIL = { height: '22px', margin: '8px' };
+        const badges = [
+          createTypesBadge(types, dtTypes, DETAIL.height),
+          createEsmBadge(esm, DETAIL.height),
+          createBundlephobiaBadge(name, DETAIL.height),
+          createSocketBadge(name, DETAIL.height),
+          createNodeBadge(name, DETAIL.height),
+        ];
+        for (const badge of badges) {
+          badge.style.marginLeft = DETAIL.margin;
+          header.appendChild(badge);
+        }
       });
     }
 
